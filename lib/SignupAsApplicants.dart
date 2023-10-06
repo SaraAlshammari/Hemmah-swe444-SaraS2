@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hemmah/login.dart';
 import 'package:hemmah/userchoice.dart';
+import 'package:password_field_validator/password_field_validator.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 TapGestureRecognizer tapGestureRecognizer = TapGestureRecognizer();
@@ -234,7 +235,7 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
                         ),
                       )
                           ? null
-                          : "Enter a valid password (should contain at least one upper case \n,at least one lower case , at least one digit ,\n at least one Special character , at least 8 characters in length )";
+                          : null;
                     },
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     controller: passc,
@@ -251,6 +252,18 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
                       ),
                     ),
                   ),
+                   const SizedBox(
+                    height: 10,
+                  ),
+                   PasswordFieldValidator(minLength: 8,
+                  uppercaseCharCount: 1,
+                  lowercaseCharCount: 1,
+                  numericCharCount: 1,
+                  specialCharCount: 1,
+                  defaultColor: Colors.black,
+                  successColor: Colors.green,
+                  failureColor: Colors.red,
+                  controller: passc),
                   const SizedBox(
                     height: 10,
                   ),

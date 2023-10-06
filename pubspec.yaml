@@ -54,6 +54,7 @@ dependencies:
   multiselect: ^0.0.7
   getwidget: ^2.0.4
   crypto: ^3.0.1
+  password_field_validator: ^0.0.1
 
 dev_dependencies:
   flutter_test:

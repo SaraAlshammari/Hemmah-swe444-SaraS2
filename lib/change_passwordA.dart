@@ -1,8 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hemmah/global/global.dart';
 import 'package:hemmah/settingsApplicant.dart';
+import 'package:password_field_validator/password_field_validator.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
-import 'start.dart';
+import 'login.dart';
 
 class ChangePasswordA extends StatefulWidget {
   const ChangePasswordA({Key? key}) : super(key: key);
@@ -28,91 +32,52 @@ class _ChangePasswordAState extends State<ChangePasswordA> {
   }
 
   Future<bool> _changePassword(
-    String currentPassword,
-    String newPassword,
-  ) async {
+      String currentPassword,
+      String newPassword,
+      ) async {
     bool success = false;
 
-    //Create an instance of the current user.
     var user = FirebaseAuth.instance.currentUser!;
-    //Must re-authenticate user before updating the password. Otherwise it may fail or user get signed out.
 
     final cred = EmailAuthProvider.credential(
       email: user.email!,
       password: currentPassword,
     );
     await user.reauthenticateWithCredential(cred).then((value) async {
-      await user.updatePassword(newPassword).then((_) {
-        success = true;
-      }).catchError((error) {
-        print(error);
-      });
+      if (value.user != null) {
+        await Future.wait([
+          componyCollection.doc(kCompanyModel?.uId).update({
+            'password': newPassword,
+          }),
+          user.updatePassword(newPassword),
+        ]).then((_) {
+
+          success = true;
+          _showMyDialog("Pasword cahnge!");
+
+        }).catchError((error) {
+          _showMyDialog("Please Enter Your New Password");
+        });
+      }
     }).catchError((err) {
-      print(err);
+      _showMyDialog("Empty Or Wrong Passwors!");
     });
 
     return success;
   }
+//سارة حطي دايولق
 
-  Future<void> _showMyDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Password Changed!'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.pop(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Start(),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _showMyDialog(String str) async {
+    QuickAlert.show(
+                          context: context,
+                          text: str,
+                          type: QuickAlertType.warning,
+                        );
   }
 
-  Future<void> _showErorrDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter Password!'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.pop(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Start(),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,16 +133,10 @@ class _ChangePasswordAState extends State<ChangePasswordA> {
                 labelText: 'old password ',
               ),
               controller: _passController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  _showErorrDialog();
-                }
-                return null;
-              },
+
             ),
             const SizedBox(),
             TextFormField(
-              autofocus: false,
               obscureText: true,
               decoration: const InputDecoration(
                 icon: Icon(Icons.visibility),
@@ -185,13 +144,17 @@ class _ChangePasswordAState extends State<ChangePasswordA> {
                 labelText: 'New password ',
               ),
               controller: _newpassController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  _showErorrDialog();
-                }
-                return null;
-              },
+
             ),
+           PasswordFieldValidator(minLength: 6,
+                uppercaseCharCount: 1,
+                lowercaseCharCount: 1,
+                numericCharCount: 1,
+                specialCharCount: 1,
+                defaultColor: Colors.black,
+                successColor: Colors.green,
+                failureColor: Colors.red,
+                controller: _newpassController),
             const SizedBox(
               height: 16,
             ),
@@ -200,19 +163,10 @@ class _ChangePasswordAState extends State<ChangePasswordA> {
                 backgroundColor: const Color(0xFFD1C4E9),
               ),
               onPressed: () {
-                if (_passController.text != "" ||
-                    _newpassController.text != "") {
-                  _changePassword(
-                    _passController.text,
-                    _newpassController.text,
-                  );
-                  _showMyDialog();
-                } else {
-                  _showErorrDialog();
-                }
+                _changePassword(_passController.text, _newpassController.text);
+
               }
 
-              //   _showErorrDialog();
 
               ,
               child: const Text(

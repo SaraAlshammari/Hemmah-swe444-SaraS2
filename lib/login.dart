@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hemmah/global/global.dart';
 import 'package:hemmah/model/company_model.dart';
+import 'package:password_field_validator/password_field_validator.dart';
 import 'package:quickalert/quickalert.dart';
 
 import 'model/applicant_model.dart';
@@ -247,6 +248,7 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                   ),
+                  
                   SizedBox(
                     height: 10,
                   ),

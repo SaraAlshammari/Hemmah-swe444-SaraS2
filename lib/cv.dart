@@ -4,9 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hemmah/applicantProfile.dart';
 import 'package:hemmah/global/global.dart';
 import 'package:hemmah/model/cv_model.dart';
-import 'package:multiselect/multiselect.dart';
 import 'package:quickalert/quickalert.dart';
-import 'package:getwidget/getwidget.dart';
 
 import 'multiselect.dart';
  
@@ -71,7 +69,9 @@ class _cvState extends State<cv> {
       'GERMAN',
       'CHINESE',
       'JAPANESE',
-      'FRENCH'
+      'FRENCH' ,
+      'KOREAN',
+      'TURKISH'
     ];
 
     final List<String>? results = await showDialog(
