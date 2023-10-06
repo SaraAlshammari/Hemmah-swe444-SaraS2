@@ -65,15 +65,15 @@ class _SignupState extends State<Signup> {
           : "Enter a valid email";
       print(y);
       if (emailc.text == "") {
-        return "empty";
+        return "emptyE";
       } else if (y == "Enter a valid email") {
         return "incorrectEmailF";
       } else if (cname.text == "") {
-        return "empty";
+        return "emptyC";
       } else if (passc.text == "") {
-        return "empty";
+        return "emptyP";
       } else if (pass.text == "") {
-        return "empty";
+        return "emptycc";
       } else if (yy == "weak") {
         return "weak";
       } else if (pass.text != passc.text) {
@@ -126,7 +126,11 @@ class _SignupState extends State<Signup> {
           s = "exist";
         }
       } catch (e) {
-        print(e);
+        QuickAlert.show(
+                          context: context,
+                          text: "Error",
+                          type: QuickAlertType.warning,
+                        );
         s = "F";
       }
       setState(() {
@@ -242,7 +246,7 @@ class _SignupState extends State<Signup> {
                     validator: (value) {
                       return passc.text.compareTo(value.toString()) == 0
                           ? null
-                          : "Different password";
+                          : "Password is not identical";
                     },
                     controller: pass,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -304,13 +308,34 @@ class _SignupState extends State<Signup> {
                           text: "email address format is not correct",
                           type: QuickAlertType.warning,
                         );
-                      } else if (validate() == "empty") {
+                      } else if (validate() == "emptycc") {
                         QuickAlert.show(
                           context: context,
                           text: "some of the field is empty",
                           type: QuickAlertType.warning,
                         );
-                      } else if (validate() == "notMatch") {
+                      }else if (validate() == "emptyE") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the email is empty",
+                          type: QuickAlertType.warning,
+                        );
+                      }
+                      else if (validate() == "emptyC") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the compony name is empty",
+                          type: QuickAlertType.warning,
+                        );
+                      }
+                      else if (validate() == "emptyP") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the password is empty",
+                          type: QuickAlertType.warning,
+                        );
+                      }
+                       else if (validate() == "notMatch") {
                         QuickAlert.show(
                           context: context,
                           text: "Password is not identical",

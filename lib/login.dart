@@ -28,7 +28,7 @@ class _LoginState extends State<Login> {
   final emailp = TextEditingController();
 
   bool isLoading = false;
-  bool _obscureText = true;
+  bool _obscureText = false;
 
   String _password = "";
 
@@ -54,9 +54,9 @@ class _LoginState extends State<Login> {
 
   String validate() {
     if (emailp.text == "") {
-      return "empty";
+      return "emptyE";
     } else if (passp.text == "") {
-      return "empty";
+      return "emptyP";
     } else {
       return "done";
     }
@@ -162,6 +162,11 @@ class _LoginState extends State<Login> {
         vv = "wrong";
         return false;
       } else {
+         QuickAlert.show(
+          context: context,
+          text: "Error",
+          type: QuickAlertType.warning,
+        );
         return false;
       }
     }
@@ -228,21 +233,24 @@ class _LoginState extends State<Login> {
                     controller: passp,
                     keyboardType: TextInputType.emailAddress,
                     obscureText: _obscureText,
-                    decoration:  InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "Enter Your password : ",
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureText
                               ? Icons.visibility
                               : Icons.visibility_off,
-                        ), onPressed: () { _toggle(); }, 
+                        ),
+                        onPressed: () {
+                          _toggle();
+                        },
                       ),
                     ),
                   ),
-                   SizedBox(
+                  SizedBox(
                     height: 10,
                   ),
-                   SizedBox(
+                  SizedBox(
                     height: 20,
                   ),
                   ElevatedButton(
@@ -254,19 +262,52 @@ class _LoginState extends State<Login> {
                         if (!mounted) return;
                         if (x) {
                           if (state == "C") {
+                            final snackBar = SnackBar(
+                              content:
+                                  const Text('Succesfully log in as Compony'),
+                              action: SnackBarAction(
+                                label: 'Undo',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+
                             Navigator.pushNamed(context, '/homepage');
                           }
                           if (state == "A") {
+                            final snackBar = SnackBar(
+                              content:
+                                  const Text('Succesfully log in as applicant'),
+                              action: SnackBarAction(
+                                label: 'Undo',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+                           
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
                             Navigator.pushNamed(context, '/homepageapplicant');
                           }
                         }
-                      } else if (validate() == "empty") {
+                      } else if (validate() == "emptyE") {
                         QuickAlert.show(
                           context: context,
-                          text: "the field is empty",
+                          text: "the email is empty",
                           type: QuickAlertType.warning,
                         );
-                      } else if (vv == "wrong") {
+                      }
+                      else if (validate() == "emptyP") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the password is empty",
+                          type: QuickAlertType.warning,
+                        );
+                      }  else if (vv == "wrong") {
                         QuickAlert.show(
                           context: context,
                           text: "Wrong password provided for that user.",
@@ -275,7 +316,7 @@ class _LoginState extends State<Login> {
                       } else if (vv == "notfound") {
                         QuickAlert.show(
                           context: context,
-                          text: "No user found for that email.",
+                          text: "No user found for this email.",
                           type: QuickAlertType.warning,
                         );
                       }

@@ -4,8 +4,12 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hemmah/applicantProfile.dart';
 import 'package:hemmah/global/global.dart';
 import 'package:hemmah/model/cv_model.dart';
+import 'package:multiselect/multiselect.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:getwidget/getwidget.dart';
 
+import 'multiselect.dart';
+ 
 class cv extends StatefulWidget {
   const cv({super.key});
 
@@ -14,40 +18,87 @@ class cv extends StatefulWidget {
 }
 
 class _cvState extends State<cv> {
+  List<String> dropList = [
+    'Arabic',
+    'English',
+    'Spanish',
+    'chinees',
+    'korean',
+  ];
+
   final credintial = FirebaseAuth.instance.currentUser;
   final edu = TextEditingController();
-  final skil = TextEditingController();
+  final major = TextEditingController();
   final cert = TextEditingController();
   final workexp = TextEditingController();
-  final vol = TextEditingController();
-  final proj = TextEditingController();
+  final ve = TextEditingController();
+  final skill = TextEditingController();
   final lang = TextEditingController();
+   final String dropdown="";
+  String eduu = "";
+  List<String> _selectedItems = [];
   @override
   void initState() {
     if (kApplicantModel?.cvModel != null) {
       edu.text = kApplicantModel!.cvModel!.education ?? "";
-      skil.text = kApplicantModel!.cvModel!.skills ?? "";
+      major.text = kApplicantModel!.cvModel!.skills ?? "";
       cert.text = kApplicantModel!.cvModel!.certifications ?? "";
       workexp.text = kApplicantModel!.cvModel!.workExperience ?? "";
-      vol.text = kApplicantModel!.cvModel!.volunteeringExperience ?? "";
-      proj.text = kApplicantModel!.cvModel!.project ?? "";
+      ve.text = kApplicantModel!.cvModel!.volunteeringExperience ?? "";
+      skill.text = kApplicantModel!.cvModel!.project ?? "";
       lang.text = kApplicantModel!.cvModel!.languages ?? "";
     }
     super.initState();
   }
 
+  String dropdownvalue = 'Bechelor Degree';
+
+  // List of items in our dropdown menu
+  var items = [
+    'Doctorate Degree',
+    'Master degree',
+    'Bechelor Degree',
+    'High school degree',
+    'less than high school degree',
+  ];
+  void _showMultiSelect() async {
+    // a list of selectable items
+    // these items can be hard-coded or dynamically fetched from a database/API
+    final List<String> items = [
+      'ENGLISH',
+      'ARABIC',
+      'SPANISH',
+      'GERMAN',
+      'CHINESE',
+      'JAPANESE',
+      'FRENCH'
+    ];
+
+    final List<String>? results = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MultiSelect(items: items);
+      },
+    );
+
+    // Update UI
+    if (results != null) {
+      setState(() {
+        _selectedItems = results;
+      });
+    }
+  }
+
   String validate() {
-    if (edu.text == "") {
-      return "empty";
-    } else if (skil.text == "")
+     if (major.text == "")
       return "empty";
     else if (cert.text == "")
       return "empty";
     else if (workexp.text == "")
       return "empty";
-    else if (vol.text == "")
+    else if (ve.text == "")
       return "empty";
-    else if (proj.text == "")
+    else if (skill.text == "")
       return "empty";
     else if (lang.text == "") return "empty";
 
@@ -83,7 +134,9 @@ class _cvState extends State<cv> {
           GButton(
             icon: Icons.history_edu,
             iconColor: const Color.fromARGB(255, 135, 108, 139),
-            onPressed: () {Navigator.pushNamed(context, '/homepageapplicant');},
+            onPressed: () {
+              Navigator.pushNamed(context, '/homepageapplicant');
+            },
           ),
           const GButton(
             icon: Icons.add_alert_outlined,
@@ -129,156 +182,199 @@ class _cvState extends State<cv> {
                 ),
               ),
               const SizedBox(
-                height: 20,
+                height: 50,
               ),
-              TextFormField(
-                // we return "null" when something is valid
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: edu,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.text,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Education",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+              Row(
+                children: [
+                  Text("Education :",style: TextStyle(fontSize: 16 , fontWeight: FontWeight.bold)),
+                  Container(
+                    margin: EdgeInsets.only(left: 20),
+                    child: DropdownButton(
+                      // Initial Value
+                      value: dropdownvalue,
+
+                      // Down Arrow Icon
+                      icon: const Icon(Icons.keyboard_arrow_down),
+
+                      // Array list of items
+                      items: items.map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
+                        );
+                      }).toList(),
+                      // After selecting the desired option,it will
+                      // change button value to selected value
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          dropdownvalue = newValue!;
+                          eduu = newValue.toString();
+                        });
+                      },
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: skil,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.emailAddress,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Skills",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+              Row(
+                children: [
+                  Text("Your Major :",style: TextStyle(fontSize: 16 , fontWeight: FontWeight.bold)),
+                  Container(
+                    width: 200,
+                    margin: EdgeInsets.only(left: 20),
+                    child: TextField(
+                      controller: major,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: false,
+                      decoration: const InputDecoration(
+                        hintText: "software engineer",
+                        hintStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                // we return "null" when something is valid
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: cert,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.emailAddress,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Certifications",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+              Row(
+                children: [
+                  Text("Certifications :",style: TextStyle(fontSize: 16 , fontWeight: FontWeight.bold)),
+                  Container(
+                    width: 200,
+                    margin: EdgeInsets.only(left: 20),
+                    child: TextField(
+                      controller: cert,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: false,
+                      decoration: const InputDecoration(
+                        hintText: "Certifications",
+                        hintStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                // we return "null" when something is valid
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: workexp,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.emailAddress,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Work Experience",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+              Row(
+                children: [
+                  Text("Work Experience :",style: TextStyle(fontSize: 16 , fontWeight: FontWeight.bold)),
+                  Container(
+                    width: 200,
+                    margin: EdgeInsets.only(left: 20),
+                    child: TextField(
+                      // we return "null" when something is valid
+
+                      controller: workexp,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: false,
+                      decoration: const InputDecoration(
+                        hintText: "Work Experience",
+                        hintStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                // we return "null" when something is valid
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: vol,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.emailAddress,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Volunteering Experience",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+              Row(
+                children: [
+                  Text("Volunteer Experience :",style: TextStyle(fontSize: 15 , fontWeight: FontWeight.bold)),
+                  Container(
+                    width: 200,
+                    margin: EdgeInsets.only(left: 20),
+                    child: TextField(
+                      // we return "null" when something is valid
+
+                      controller: ve,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: false,
+                      decoration: const InputDecoration(
+                        hintText: "Volunteer Experience",
+                        hintStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                // we return "null" when something is valid
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: proj,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.emailAddress,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Projects",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+              Row(
+                children: [
+                  Text("Skills :" ,style: TextStyle(fontSize: 16 , fontWeight: FontWeight.bold),),
+                  Container(
+                    width: 200,
+                    margin: EdgeInsets.only(left: 20),
+                    child: TextField(
+                      // we return "null" when something is valid
+
+                      controller: skill,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: false,
+                      decoration: const InputDecoration(
+                        hintText: "Computer skills ...",
+                        hintStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              TextFormField(
-                // we return "null" when something is valid
-                validator: (value) {
-                  return value.toString().isNotEmpty ? null : "Empty";
-                },
-                controller: lang,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.emailAddress,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  hintText: "Languages",
-                  hintStyle: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
+               ElevatedButton(
+              onPressed:_showMultiSelect, 
+              child: const Text('Select Your spoken languages'),
+            ),
+            const Divider(
+              height: 30,
+            ),
+            // display selected items
+            Wrap(
+              children: _selectedItems
+                  .map((e) => Chip(
+                        label: Text(e),
+                      ))
+                  .toList(),),
+            
+              
+            
               Container(
                 width: 120,
                 margin: const EdgeInsets.only(left: 0),
                 child: ElevatedButton(
                   onPressed: () async {
+                     var stringList = _selectedItems.join(" , ");
+                      print(stringList);
+                      print(eduu.toString());
+
                     if (validate() == "Done") {
+
                       CVModel cv = CVModel(
-                        education: edu.text,
-                        skills: skil.text,
+                        education: eduu.toString(),
+                        skills: major.text,
                         certifications: cert.text,
                         workExperience: workexp.text,
-                        volunteeringExperience: vol.text,
-                        project: proj.text,
-                        languages: lang.text,
+                        volunteeringExperience: ve.text,
+                        project: skill.text,
+                        languages: stringList,
                         notificationToken: kNotificationToken,
                       );
+                      
 
                       await applicantsCollection
                           .doc(kApplicantModel?.uId)

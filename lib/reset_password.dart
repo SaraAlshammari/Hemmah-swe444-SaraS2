@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 import 'auth_exception_handler.dart';
 import 'start.dart';
@@ -204,9 +206,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             email: _emailController.text.trim(),
                           );
                           if (status == AuthStatus.successful) {
-                            _showMyDialog();
+                            QuickAlert.show(
+                            context: context,
+                            text: "Successfully Send",
+                            type: QuickAlertType.success,
+                          );
+                            //_showMyDialog();
                             //your logic
-                          } else {}
+                          } else {  QuickAlert.show(
+                            context: context,
+                            text: "Error",
+                            type: QuickAlertType.success,
+                          );}
                         }
                       },
                       minWidth: double.infinity,

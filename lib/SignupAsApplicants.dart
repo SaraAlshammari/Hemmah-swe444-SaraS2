@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hemmah/login.dart';
 import 'package:hemmah/userchoice.dart';
-
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 TapGestureRecognizer tapGestureRecognizer = TapGestureRecognizer();
 
 class SignupAsApplicants extends StatefulWidget {
@@ -21,13 +25,37 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
   final fullname = TextEditingController();
   final passcc = TextEditingController();
   final passc = TextEditingController();
+   bool _obscureText = true;
 
+  bool _obscureText2 = true;
   @override
   void dispose() {
     emailc.dispose();
     passc.dispose();
     // TODO: implement dispose
     super.dispose();
+  }
+  void _toggle() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
+  void _toggle2() {
+    setState(() {
+      _obscureText2 = !_obscureText2;
+    });
+  }
+  String encryptPassword(String password) {
+  final bytes = utf8.encode(password);
+  final hash = sha256.convert(bytes);
+  return hash.toString();
+}
+   quicka(String s)async{
+   QuickAlert.show(
+                          context: context,
+                          text:s,
+                          type: QuickAlertType.warning,
+                        );
   }
 
   @override
@@ -49,15 +77,15 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
           : "Enter a valid email";
       print(y);
       if (emailc.text == "") {
-        return "empty";
+        return "emptyE";
       } else if (y == "Enter a valid email") {
         return "incorrectEmailF";
       } else if (fullname.text == "") {
-        return "empty";
+        return "emptyF";
       } else if (passc.text == "") {
-        return "empty";
+        return "emptyP";
       } else if (passcc.text == "") {
-        return "empty";
+        return "emptyPP";
       } else if (yy == "weak") {
         return "weak";
       } else if (passcc.text != passc.text) {
@@ -76,7 +104,7 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
         final credential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailc.text,
-          password: passc.text,
+          password: passc.text ,
         );
         CollectionReference users =
             FirebaseFirestore.instance.collection('Applicants');
@@ -87,36 +115,31 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
               {
                 'fullName': fullname.text,
                 'Email': emailc.text,
-                'password': passc.text,
+                'password': encryptPassword(passc.text) ,
               },
             )
             .then((value) => print("User Added"))
             .catchError((error) => print("Failed to add user: $error"));
         s = "D";
       } on FirebaseAuthException catch (e) {
+       
         if (e.code == 'weak-password') {
-          final snackBar = SnackBar(
-            content: const Text('The password provided is too weak.'),
-            action: SnackBarAction(
-              label: 'close',
-              onPressed: () {
-                // Some code to undo the change.
-              },
-            ),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          QuickAlert.show(
+                          context: context,
+                          text: "the password is weak , A password must contains at least eight characters, including at least one number and includes both lower and uppercase letters and special characters",
+                          type: QuickAlertType.warning,
+                        );
+         
+      
           s = "w";
         } else if (e.code == 'email-already-in-use') {
-          final snackBar = SnackBar(
-            content: const Text('The account already exists for that email.'),
-            action: SnackBarAction(
-              label: 'close',
-              onPressed: () {
-                // Some code to undo the change.
-              },
-            ),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+           
+                          QuickAlert.show(
+                          context: context,
+                          text: "The account already exists for that email.",
+                          type: QuickAlertType.warning,
+                        );
+          
           s = "exist";
         }
       } catch (e) {
@@ -216,10 +239,16 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     controller: passc,
                     keyboardType: TextInputType.emailAddress,
-                    obscureText: false,
-                    decoration: const InputDecoration(
+                    obscureText: _obscureText,
+                    decoration:  InputDecoration(
                       hintText: "Enter Your password : ",
-                      suffixIcon: Icon(Icons.visibility),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ), onPressed: () { _toggle(); }, 
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -230,15 +259,21 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
                     validator: (value) {
                       return passc.text.compareTo(value.toString()) == 0
                           ? null
-                          : "Different password";
+                          : "Password is not identical";
                     },
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     controller: passcc,
                     keyboardType: TextInputType.emailAddress,
-                    obscureText: false,
-                    decoration: const InputDecoration(
+                    obscureText: _obscureText2,
+                    decoration:  InputDecoration(
                       hintText: "Confirm Your password : ",
-                      suffixIcon: Icon(Icons.visibility),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText2
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ), onPressed: () { _toggle2(); }, 
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -252,97 +287,89 @@ class _SignupAsApplicantsState extends State<SignupAsApplicants> {
                         await register();
                         if (!mounted) return;
                         if (s == "D") {
-                          final snackBar = SnackBar(
-                            content: const Text('Successfully Register'),
-                            action: SnackBarAction(
-                              label: 'close',
-                              onPressed: () {
-                                // Some code to undo the change.
-                              },
-                            ),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-                          Navigator.pushReplacement(
+                         
+                         final snackBar = SnackBar(
+            content: const Text('Successfully Register'),
+            action: SnackBarAction(
+              label: 'close',
+              onPressed: () {
+                // Some code to undo the change.
+              },
+            ),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          
+                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const Login(
-                                isApplicant: true,
+                                isApplicant: false,
                               ),
                             ),
                           );
                         }
                       } else if (s == "exist") {
-                        final snackBar = SnackBar(
-                          content: const Text(
-                            'The account already exists for that email.',
-                          ),
-                          action: SnackBarAction(
-                            label: 'close',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
+                        QuickAlert.show(
+                          context: context,
+                          text: "The account already exists for that email. ",
+                          type: QuickAlertType.warning,
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        
                       } else if (validate() == "weak" || s == "w") {
-                        final snackBar = SnackBar(
-                          content: const Text(
-                            'the password is weak , A password must contains at least eight characters, including at least one number and includes both lower and uppercase letters and special characters',
-                          ),
-                          action: SnackBarAction(
-                            label: 'close',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
+                        QuickAlert.show(
+                          context: context,
+                          text: "the password is weak , A password must contains at least eight characters, including at least one number and includes both lower and uppercase letters and special characters ",
+                          type: QuickAlertType.warning,
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        
                       } else if (validate() == "incorrectEmailF") {
-                        final snackBar = SnackBar(
-                          content:
-                              const Text('email address format is not correct'),
-                          action: SnackBarAction(
-                            label: 'close',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
+                         QuickAlert.show(
+                          context: context,
+                          text: "email address format is not correct ",
+                          type: QuickAlertType.warning,
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      } else if (validate() == "empty") {
-                        final snackBar = SnackBar(
-                          content: const Text('some of the field is empty'),
-                          action: SnackBarAction(
-                            label: 'close',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
+                        
+                      }else if (validate() == "emptyE") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the email is empty",
+                          type: QuickAlertType.warning,
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                      else if (validate() == "emptyF") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the applicant full name is empty",
+                          type: QuickAlertType.warning,
+                        );
+                      }
+                        else if (validate() == "emptyP") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the password is empty",
+                          type: QuickAlertType.warning,
+                        );
+                      }
+                       else if (validate() == "emptyPP") {
+                        QuickAlert.show(
+                          context: context,
+                          text: "the confirm password is empty",
+                          type: QuickAlertType.warning,
+                        );
                       } else if (validate() == "notMatch") {
-                        final snackBar = SnackBar(
-                          content: const Text('Password is not identical '),
-                          action: SnackBarAction(
-                            label: 'close',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
+                       
+                        QuickAlert.show(
+                          context: context,
+                          text: "Password is not identical ",
+                          type: QuickAlertType.warning,
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
-                        final snackBar = SnackBar(
-                          content: const Text('Erorr'),
-                          action: SnackBarAction(
-                            label: 'close',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
+                         QuickAlert.show(
+                          context: context,
+                          text: "Error ",
+                          type: QuickAlertType.warning,
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                       
                       }
                     },
                     style: ButtonStyle(
