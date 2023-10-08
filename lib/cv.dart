@@ -100,7 +100,7 @@ class _cvState extends State<cv> {
       return "empty";
     else if (skill.text == "")
       return "empty";
-    else if (lang.text == "") return "empty";
+   
 
     return "Done";
   }
